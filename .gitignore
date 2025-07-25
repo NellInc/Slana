@@ -1,0 +1,19 @@
+# Node modules
+node_modules/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Environment variables
+.env
+
+# IDE
+.idea/
+.vscode/
+
+# Temporary files
+*.tmp
+*.bak
