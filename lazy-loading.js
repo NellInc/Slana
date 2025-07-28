@@ -33,6 +33,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     images.forEach(img => {
+      // Skip logo and header images from lazy loading
+      if (img.closest('#logoImage, #header') || img.src.includes('slana-logo')) {
+        img.classList.add('lazy-loaded'); // Mark as loaded immediately
+        return;
+      }
+      
       // For images that already have src, store it in data-src and use placeholder
       if (!img.dataset.src && img.src && !img.classList.contains('lazy-loaded')) {
         img.dataset.src = img.src;
@@ -115,8 +121,8 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
     
-    /* Placeholder styling */
-    img:not(.lazy-loaded) {
+    /* Placeholder styling - exclude logo and header images */
+    img:not(.lazy-loaded):not(#logoImage img):not(#header img) {
       background-color: #f0f0f0;
       min-height: 100px;
     }
