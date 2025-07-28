@@ -20,62 +20,126 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const emailInput = form.querySelector('input[type="email"]');
     const submitButton = form.querySelector('button[type="submit"]');
+    const successMessage = form.querySelector('.form-submission-text');
+    const formFields = form.querySelector('.newsletter-form-body');
     const email = emailInput.value;
 
+    // Clear any previous messages
+    hideMessage();
+
     if (!email) {
-      alert('Please enter your email address');
+      showErrorMessage('Please enter your email address');
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      showErrorMessage('Please enter a valid email address');
       return;
     }
 
     // Disable button during submission
-    const originalText = submitButton.textContent;
-    submitButton.textContent = 'Submitting...';
+    const originalText = submitButton.querySelector('.newsletter-form-button-label').textContent;
+    submitButton.querySelector('.newsletter-form-button-label').textContent = 'Submitting...';
     submitButton.disabled = true;
 
     try {
-      // If Google Script URL is not set, save to localStorage for now
-      if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
-        // Fallback: Save to localStorage
-        const subscribers = JSON.parse(localStorage.getItem('slana_subscribers') || '[]');
-        subscribers.push({
+      // Send to Google Sheets
+      const response = await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           email: email,
           timestamp: new Date().toISOString()
-        });
-        localStorage.setItem('slana_subscribers', JSON.stringify(subscribers));
-        
-        // Show success message
-        alert('Thank you for subscribing! (Note: Currently saving locally - contact site owner to activate Google Sheets integration)');
-        console.log('Subscribers:', subscribers);
-      } else {
-        // Send to Google Sheets
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: email,
-            timestamp: new Date().toISOString()
-          })
-        });
+        })
+      });
 
-        // Show success message
-        alert('Thank you for subscribing to Slana updates!');
-      }
-
+      // Show success message inline
+      showSuccessMessage('Thank you for subscribing to Slana updates!');
+      
       // Clear form
       emailInput.value = '';
       
     } catch (error) {
       console.error('Subscription error:', error);
-      alert('Sorry, there was an error. Please try again later.');
+      showErrorMessage('Sorry, there was an error. Please try again later.');
     } finally {
       // Re-enable button
-      submitButton.textContent = originalText;
+      submitButton.querySelector('.newsletter-form-button-label').textContent = originalText;
       submitButton.disabled = false;
     }
   });
+
+  // Helper functions for showing messages
+  function showSuccessMessage(message) {
+    const messageDiv = form.querySelector('.form-submission-text');
+    const formBody = form.querySelector('.newsletter-form-body');
+    
+    messageDiv.textContent = message;
+    messageDiv.className = 'form-submission-text success-message';
+    messageDiv.style.display = 'block';
+    formBody.style.display = 'none';
+    
+    // Hide message after 5 seconds and show form again
+    setTimeout(() => {
+      hideMessage();
+    }, 5000);
+  }
+
+  function showErrorMessage(message) {
+    const messageDiv = form.querySelector('.form-submission-text');
+    
+    messageDiv.textContent = message;
+    messageDiv.className = 'form-submission-text error-message';
+    messageDiv.style.display = 'block';
+    
+    // Hide error message after 3 seconds
+    setTimeout(() => {
+      hideMessage();
+    }, 3000);
+  }
+
+  function hideMessage() {
+    const messageDiv = form.querySelector('.form-submission-text');
+    const formBody = form.querySelector('.newsletter-form-body');
+    
+    messageDiv.style.display = 'none';
+    formBody.style.display = 'block';
+    messageDiv.className = 'form-submission-text';
+  }
+
+  // Add CSS for message styling
+  const style = document.createElement('style');
+  style.textContent = `
+    .form-submission-text.success-message {
+      background-color: #4CAF50;
+      color: white;
+      padding: 15px;
+      border-radius: 4px;
+      text-align: center;
+      margin: 10px 0;
+      font-weight: 500;
+    }
+    
+    .form-submission-text.error-message {
+      background-color: #f44336;
+      color: white;
+      padding: 15px;
+      border-radius: 4px;
+      text-align: center;
+      margin: 10px 0;
+      font-weight: 500;
+    }
+    
+    .form-submission-text {
+      display: none;
+    }
+  `;
+  document.head.appendChild(style);
 });
 
 /* 
