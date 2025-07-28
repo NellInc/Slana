@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // 2. Go to Extensions > Apps Script
   // 3. Replace the code with the Google Apps Script code below
   // 4. Deploy as Web App and copy the URL here
-  const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyjOi3mnvynWtnd3J9klcAdFPoVwviSUFchFdyId7K5DbdIxt1KUWzL9M1Zc2v0ospfWQ/exec';
 
   // Override form submission
   form.addEventListener('submit', async function(e) {
